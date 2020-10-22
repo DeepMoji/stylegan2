@@ -31,14 +31,20 @@ if __name__ == "__main__":
     RAW_IMAGES_DIR = sys.argv[1]
     ALIGNED_IMAGES_DIR = sys.argv[2]
 
-    logging.basicConfig(level=logging.INFO, file='align_log.log')
+    log_data = False
+    if len(sys.argv) > 3:
+        LOG_FILE = sys.argv[3]
+        log_data = True
+
+    if log_data:
+        logging.basicConfig(level=logging.INFO, filename=LOG_FILE)
 
     landmarks_detector = LandmarksDetector(landmarks_model_path)
     cnt = -1
     for img_name in [x for x in os.listdir(RAW_IMAGES_DIR) if x[0] not in '._']:
         cnt = cnt + 1
         res_string = "Processing image num" + str(cnt) + " " + img_name
-        logging.error(res_string)
+        logging.info(res_string)
         raw_img_path = os.path.join(RAW_IMAGES_DIR, img_name)
         for i, face_landmarks in enumerate(landmarks_detector.get_landmarks(raw_img_path), start=1):
             face_img_name = '%s_%02d.png' % (os.path.splitext(img_name)[0], i)
