@@ -7,6 +7,8 @@ from tensorflow.keras.utils import get_file
 from ffhq_dataset.face_alignment import image_align
 from ffhq_dataset.landmarks_detector import LandmarksDetector
 
+import logging
+
 LANDMARKS_MODEL_URL = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
 
 
@@ -29,8 +31,13 @@ if __name__ == "__main__":
     RAW_IMAGES_DIR = sys.argv[1]
     ALIGNED_IMAGES_DIR = sys.argv[2]
 
+    logging.basicConfig(level=logging.INFO, file='align_log.log')
+
     landmarks_detector = LandmarksDetector(landmarks_model_path)
+    cnt = -1
     for img_name in [x for x in os.listdir(RAW_IMAGES_DIR) if x[0] not in '._']:
+        cnt = cnt + 1
+        logging.error("Processing image num {x} name: {y}".format(x=cnt, y=img_name))
         raw_img_path = os.path.join(RAW_IMAGES_DIR, img_name)
         for i, face_landmarks in enumerate(landmarks_detector.get_landmarks(raw_img_path), start=1):
             face_img_name = '%s_%02d.png' % (os.path.splitext(img_name)[0], i)
