@@ -98,6 +98,15 @@ def main():
     parser.add_argument('--logfile', default='', help='path to logfile')
     args = parser.parse_args()
 
+    log_data = False
+    if parser.logfile != '':
+        log_data = True
+
+    if log_data:
+        logging.basicConfig(level=logging.INFO, filename=parser.logfile)
+
+    exit(1)
+
     print('Loading networks from "%s"...' % args.network_pkl)
     _G, _D, Gs = pretrained_networks.load_networks(args.network_pkl)
     proj = projector.Projector(
@@ -108,13 +117,6 @@ def main():
         verbose               = args.verbose
     )
     proj.set_network(Gs)
-
-    log_data = False
-    if parser.logfile != '':
-        log_data = True
-
-    if log_data:
-        logging.basicConfig(level=logging.INFO, filename=parser.logfile)
 
     src_files = ['{:05d}'.format(k) + '_01.png' for k in range(70000)]
     if log_data:
