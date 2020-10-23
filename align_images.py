@@ -41,13 +41,20 @@ if __name__ == "__main__":
 
     landmarks_detector = LandmarksDetector(landmarks_model_path)
     cnt = -1
-    for img_name in [x for x in os.listdir(RAW_IMAGES_DIR) if x[0] not in '._']:
+    file_list = [x for x in os.listdir(RAW_IMAGES_DIR) if x[0] not in '._']
+    file_list.sort()
+    logging.info(' There are ' + str(len(file_list)) + ' files')
+    for img_name in file_list:
         cnt = cnt + 1
-        res_string = "Processing image num" + str(cnt) + " " + img_name
+        res_string = "Processing image num " + str(cnt) + " " + img_name
         logging.info(res_string)
         raw_img_path = os.path.join(RAW_IMAGES_DIR, img_name)
+        num_landmarks = 0
         for i, face_landmarks in enumerate(landmarks_detector.get_landmarks(raw_img_path), start=1):
             face_img_name = '%s_%02d.png' % (os.path.splitext(img_name)[0], i)
             aligned_face_path = os.path.join(ALIGNED_IMAGES_DIR, face_img_name)
             os.makedirs(ALIGNED_IMAGES_DIR, exist_ok=True)
             image_align(raw_img_path, aligned_face_path, face_landmarks)
+            num_landmarks = num_landmarks + 1
+        logging.info('There are ' + str(num_landmarks) + ' landmarks')
+    logging.info('Done processing')  
