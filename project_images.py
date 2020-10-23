@@ -13,6 +13,7 @@ import dataset_tool
 from training import dataset
 from training import misc
 
+import logging
 
 def project_image(proj, src_file, dst_dir, tmp_dir, video=False):
 
@@ -94,6 +95,7 @@ def main():
     parser.add_argument('--video-fps', type=int, default=25, help='Video framerate')
     parser.add_argument('--video-codec', default='libx264', help='Video codec')
     parser.add_argument('--video-bitrate', default='5M', help='Video bitrate')
+    parser.add_argument('--logfile', default='', help='path to logfile')
     args = parser.parse_args()
 
     print('Loading networks from "%s"...' % args.network_pkl)
@@ -107,7 +109,18 @@ def main():
     )
     proj.set_network(Gs)
 
-    src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
+    log_data = False
+    if parser.logfile != '':
+        log_data = True
+
+    if log_data:
+        logging.basicConfig(level=logging.INFO, filename=parser.logfile)
+
+    src_files = ['{:05d}'.format(k) + '_01.png' for k in range(70000)]
+    if log_data:
+        logging.info('start logging')
+    exit(1)
+    # src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
     for src_file in src_files:
         project_image(proj, src_file, args.dst_dir, args.tmp_dir, video=args.video)
         if args.video:
