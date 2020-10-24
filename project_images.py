@@ -99,13 +99,12 @@ def main():
     args = parser.parse_args()
 
     log_data = False
-    if parser.logfile != '':
+    if args.logfile != '':
         log_data = True
 
     if log_data:
-        logging.basicConfig(level=logging.INFO, filename=parser.logfile)
-
-    exit(1)
+        logging.basicConfig(level=logging.INFO, filename=args.logfile)
+        logging.info('start logging')
 
     print('Loading networks from "%s"...' % args.network_pkl)
     _G, _D, Gs = pretrained_networks.load_networks(args.network_pkl)
@@ -118,12 +117,15 @@ def main():
     )
     proj.set_network(Gs)
 
-    src_files = ['{:05d}'.format(k) + '_01.png' for k in range(70000)]
-    if log_data:
-        logging.info('start logging')
-    exit(1)
+    src_files = [os.path.join(args.src_dir, '{:05d}'.format(k) + '_01.png') for k in range(70000)]
     # src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
-    for src_file in src_files:
+    for cnt, src_file in enumerate(src_files):
+        logging.info('Processing ' + src_file)
+        if cnt < 304:
+            continue
+        if not os.path.isfile(src_file):
+            logging.info('No file ' + src_file)
+            continue
         project_image(proj, src_file, args.dst_dir, args.tmp_dir, video=args.video)
         if args.video:
             render_video(
