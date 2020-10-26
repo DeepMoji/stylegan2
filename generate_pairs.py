@@ -4,7 +4,7 @@ from PIL import Image
 import dnnlib
 import dnnlib.tflib as tflib
 from pathlib import Path
-
+import sys
 
 def main():
     # use my copy of the blended model to save Doron's download bandwidth
