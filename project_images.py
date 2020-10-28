@@ -153,7 +153,10 @@ def main():
 
     args = process_args()
 
-    bins = np.linspace(int(args.start_frame), int(args.end_frame), int((args.end_frame - args.start_frame) / 200)).astype('int ')
+    st = int(args.start_frame)
+    en = int(args.end_frame)
+    df = int((en - st) / 200)
+    bins = np.linspace(st, en, df).astype('int')
 
     for k in range(len(bins) - 1):
         run_network(args, bins[k], bins[k + 1])
