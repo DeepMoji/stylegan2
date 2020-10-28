@@ -78,26 +78,40 @@ def render_video(src_file, dst_dir, tmp_dir, num_frames, mode, size, fps, codec,
     video_clip.write_videofile(filename, fps=fps, codec=codec, bitrate=bitrate)
 
 
-def main():
+def process_args():
     parser = argparse.ArgumentParser(description='Project real-world images into StyleGAN2 latent space')
     parser.add_argument('src_dir', help='Directory with aligned images for projection')
     parser.add_argument('dst_dir', help='Output directory')
-    parser.add_argument('--tmp-dir', default='.stylegan2-tmp', help='Temporary directory for tfrecords and video frames')
-    parser.add_argument('--network-pkl', default='http://d36zk2xti64re0.cloudfront.net/stylegan2/networks/stylegan2-ffhq-config-f.pkl', help='StyleGAN2 network pickle filename')
-    parser.add_argument('--vgg16-pkl', default='http://d36zk2xti64re0.cloudfront.net/stylegan1/networks/metrics/vgg16_zhang_perceptual.pkl', help='VGG16 network pickle filename')
+    parser.add_argument('--tmp-dir', default='.stylegan2-tmp',
+                        help='Temporary directory for tfrecords and video frames')
+    parser.add_argument('--network-pkl',
+                        default='http://d36zk2xti64re0.cloudfront.net/stylegan2/networks/stylegan2-ffhq-config-f.pkl',
+                        help='StyleGAN2 network pickle filename')
+    parser.add_argument('--vgg16-pkl',
+                        default='http://d36zk2xti64re0.cloudfront.net/stylegan1/networks/metrics/vgg16_zhang_perceptual.pkl',
+                        help='VGG16 network pickle filename')
     parser.add_argument('--num-steps', type=int, default=1000, help='Number of optimization steps')
     parser.add_argument('--initial-learning-rate', type=float, default=0.1, help='Initial learning rate')
     parser.add_argument('--initial-noise-factor', type=float, default=0.05, help='Initial noise factor')
     parser.add_argument('--verbose', type=bool, default=False, help='Verbose output')
     parser.add_argument('--video', type=bool, default=False, help='Render video of the optimization process')
-    parser.add_argument('--video-mode', type=int, default=1, help='Video mode: 1 for optimization only, 2 for source + optimization')
+    parser.add_argument('--video-mode', type=int, default=1,
+                        help='Video mode: 1 for optimization only, 2 for source + optimization')
     parser.add_argument('--video-size', type=int, default=1024, help='Video size (height in px)')
     parser.add_argument('--video-fps', type=int, default=25, help='Video framerate')
     parser.add_argument('--video-codec', default='libx264', help='Video codec')
     parser.add_argument('--video-bitrate', default='5M', help='Video bitrate')
     parser.add_argument('--logfile', default='', help='path to logfile')
+
+    parser.add_argument('--start_frame', type=int, default=0, help='First frame to process')
+    parser.add_argument('--end_frame', type=int, default=70000, help='Last frame to process')
+
     args = parser.parse_args()
 
+    return args
+
+
+def run_network(args, start_bin, end_bin):
     log_data = False
     if args.logfile != '':
         log_data = True
@@ -109,11 +123,11 @@ def main():
     print('Loading networks from "%s"...' % args.network_pkl)
     _G, _D, Gs = pretrained_networks.load_networks(args.network_pkl)
     proj = projector.Projector(
-        vgg16_pkl             = args.vgg16_pkl,
-        num_steps             = args.num_steps,
-        initial_learning_rate = args.initial_learning_rate,
-        initial_noise_factor  = args.initial_noise_factor,
-        verbose               = args.verbose
+        vgg16_pkl=args.vgg16_pkl,
+        num_steps=args.num_steps,
+        initial_learning_rate=args.initial_learning_rate,
+        initial_noise_factor=args.initial_noise_factor,
+        verbose=args.verbose
     )
     proj.set_network(Gs)
 
@@ -121,7 +135,7 @@ def main():
     # src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
     for cnt, src_file in enumerate(src_files):
         logging.info('Processing ' + src_file)
-        if cnt < 304:
+        if cnt < start_bin or cnt > end_bin:
             continue
         if not os.path.isfile(src_file):
             logging.info('No file ' + src_file)
@@ -133,6 +147,19 @@ def main():
                 args.video_size, args.video_fps, args.video_codec, args.video_bitrate
             )
         shutil.rmtree(args.tmp_dir)
+
+
+def main():
+
+    args = process_args()
+
+    bins = np.linspace(args.start_frame, args.end_frame, (args.end_frame - args.start_frame) / 200).astype('int ')
+
+    for k in range(len(bins) - 1):
+        run_network(args, bins[k], bins[k + 1])
+
+
+
 
 
 if __name__ == '__main__':
