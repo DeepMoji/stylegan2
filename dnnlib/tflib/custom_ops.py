@@ -14,6 +14,10 @@ import hashlib
 import tempfile
 import shutil
 import tensorflow as tf
+import subprocess, io
+from typing import (
+    List, BinaryIO, TextIO, Iterator, Union, Optional, Callable, Tuple, Type, Any, IO, Iterable
+)
 from tensorflow.python.client import device_lib # pylint: disable=no-name-in-module
 
 #----------------------------------------------------------------------------
@@ -47,14 +51,23 @@ def _get_compute_cap(device):
     return (major, minor)
 
 def _get_cuda_gpu_arch_string():
-    gpus = [x for x in device_lib.list_local_devices() if x.device_type == 'GPU']
+    gpus = [x for x in device_lib.list_local_devices() if (x.device_type == 'GPU')]
     if len(gpus) == 0:
         raise RuntimeError('No GPU devices found')
     (major, minor) = _get_compute_cap(gpus[0])
     return 'sm_%s%s' % (major, minor)
 
+
+def myopen(cmd, buffering=-1):
+    proc = subprocess.Popen(cmd, shell=True,
+                            stdout=subprocess.PIPE,
+                            bufsize=buffering,
+                            executable='/bin/bash')
+    return os._wrap_close(io.TextIOWrapper(proc.stdout), proc)
+
 def _run_cmd(cmd):
     with os.popen(cmd) as pipe:
+    #with myopen(cmd) as pipe:
         output = pipe.read()
         status = pipe.close()
     if status is not None:
@@ -105,7 +118,7 @@ def get_plugin(cuda_file):
         # Hash headers included by the CUDA code by running it through the preprocessor.
         if not do_not_hash_included_headers:
             if verbose:
-                print('Preprocessing... ', end='', flush=True)
+                print('Preprocessing... ')
             with tempfile.TemporaryDirectory() as tmp_dir:
                 tmp_file = os.path.join(tmp_dir, cuda_file_name + '_tmp' + cuda_file_ext)
                 _run_cmd(_prepare_nvcc_cli('"%s" --preprocess -o "%s" --keep --keep-dir "%s"' % (cuda_file, tmp_file, tmp_dir)))

@@ -1,12 +1,12 @@
-# from https://github.com/rolux/stylegan2encoder
+    # from https://github.com/rolux/stylegan2encoder
 
 import argparse
 import os
 import shutil
 import numpy as np
 
-import dnnlib
-import dnnlib.tflib as tflib
+# import dnnlib
+# import dnnlib.tflib as tflib
 import pretrained_networks
 import projector
 import dataset_tool
@@ -35,15 +35,16 @@ def project_image(proj, src_file, dst_dir, tmp_dir, video=False):
     images = misc.adjust_dynamic_range(images, [0, 255], [-1, 1])
     proj.start(images)
     if video:
-        video_dir = '%s/video' % tmp_dir
+        # video_dir = '%s/video' % tmp_dir
+        video_dir = '%s/video' % dst_dir
         os.makedirs(video_dir, exist_ok=True)
     while proj.get_cur_step() < proj.num_steps:
-        print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
+        print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps))
         proj.step()
         if video:
             filename = '%s/%08d.png' % (video_dir, proj.get_cur_step())
             misc.save_image_grid(proj.get_images(), filename, drange=[-1,1])
-    print('\r%-30s\r' % '', end='', flush=True)
+    print('\r%-30s\r' % '')
 
     os.makedirs(dst_dir, exist_ok=True)
     filename = os.path.join(dst_dir, os.path.basename(src_file)[:-4] + '.png')
@@ -131,8 +132,8 @@ def run_network(args, start_bin, end_bin):
     )
     proj.set_network(Gs)
 
-    src_files = [os.path.join(args.src_dir, '{:05d}'.format(k) + '_01.png') for k in range(70000)]
-    # src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
+    # src_files = [os.path.join(args.src_dir, '{:05d}'.format(k) + '_01.png') for k in range(70000)]
+    src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
     for cnt, src_file in enumerate(src_files):
         logging.info('Processing ' + src_file)
         if cnt < start_bin or cnt > end_bin:
@@ -150,7 +151,10 @@ def run_network(args, start_bin, end_bin):
 
 
 def main():
-
+    os.environ['PATH'] = ':'.join(['/usr/local/cuda/bin:/opt/conda/envs/stylegan2/bin:/opt/conda/condabin', os.getenv('PATH')])
+    os.environ['LD_LIBRARY_PATH'] = '/usr/local/cuda/lib64' #':/usr/local/nccl2/lib:/usr/local/cuda/extras/CUPTI/lib64'
+    os.environ[
+        'LD_RUN_PATH'] = '/usr/local/cuda/lib64'  # ':/usr/local/nccl2/lib:/usr/local/cuda/extras/CUPTI/lib64'
     args = process_args()
 
     st = int(args.start_frame)
@@ -158,8 +162,10 @@ def main():
     df = int((en - st) / 200)
     bins = np.linspace(st, en, df).astype('int')
 
-    for k in range(len(bins) - 1):
-        run_network(args, bins[k], bins[k + 1])
+    run_network(args, 0, 1000)
+
+    # for k in range(len(bins) - 1):
+    #     run_network(args, bins[k], bins[k + 1])
 
 
 
