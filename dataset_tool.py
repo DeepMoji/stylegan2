@@ -948,5 +948,13 @@ def execute_cmdline(argv):
 
 if __name__ == "__main__":
     execute_cmdline(sys.argv)
-
+    # path = '/root/data/cartoon/cartoon/'
+    # patho = '/root/data/cartoon/cartoon1/'
+    # from PIL import Image as PIM
+    # for img_name in os.listdir(path):
+    #     if img_name[0] == '.':
+    #         continue
+    #     img = PIM.open(path+img_name)
+    #     im_resized = img.resize((512, 512))
+    #     im_resized.save(patho+img_name)
 # ----------------------------------------------------------------------------

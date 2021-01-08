@@ -219,6 +219,13 @@ def main():
 #----------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    os.environ['PATH'] = ':'.join(
+        ['/usr/local/cuda/bin:/opt/conda/envs/stylegan2/bin:/opt/conda/condabin', os.getenv('PATH')])
+    os.environ[
+        'LD_LIBRARY_PATH'] = '/usr/local/cuda/lib64'  # ':/usr/local/nccl2/lib:/usr/local/cuda/extras/CUPTI/lib64'
+    os.environ[
+        'LD_RUN_PATH'] = '/usr/local/cuda/lib64'  # ':/usr/local/nccl2/lib:/usr/local/cuda/extras/CUPTI/lib64'
+
     main()
 
 #----------------------------------------------------------------------------
