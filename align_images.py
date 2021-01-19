@@ -26,8 +26,9 @@ if __name__ == "__main__":
     python align_images.py /raw_images /aligned_images
     """
 
-    landmarks_model_path = unpack_bz2(get_file('shape_predictor_68_face_landmarks.dat.bz2',
-                                               LANDMARKS_MODEL_URL, cache_subdir='temp'))
+    # Uncomment to download
+    # landmarks_model_path = unpack_bz2(get_file('shape_predictor_68_face_landmarks.dat.bz2',
+    #                                            LANDMARKS_MODEL_URL, cache_subdir='temp'))
     RAW_IMAGES_DIR = sys.argv[1]
     ALIGNED_IMAGES_DIR = sys.argv[2]
 
@@ -39,7 +40,8 @@ if __name__ == "__main__":
     if log_data:
         logging.basicConfig(level=logging.INFO, filename=LOG_FILE)
 
-    landmarks_detector = LandmarksDetector(landmarks_model_path)
+    # landmarks_detector = LandmarksDetector(landmarks_model_path)
+    landmarks_detector = LandmarksDetector('/Users/michaelko/Code/backup/lib/shape_predictor_68_face_landmarks.dat')
     cnt = -1
     file_list = [x for x in os.listdir(RAW_IMAGES_DIR) if x[0] not in '._']
     file_list.sort()

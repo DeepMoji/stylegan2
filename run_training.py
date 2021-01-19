@@ -53,6 +53,7 @@ def run(dataset, data_dir, result_dir, config_id, num_gpus, total_kimg, gamma, m
     train.resume_with_new_nets = resume_with_new_nets
     train.image_snapshot_ticks = 1
     train.network_snapshot_ticks = network_snapshot_ticks
+    train.network_snapshot_ticks = 1
     sched.G_lrate_base = sched.D_lrate_base = lr
     train.resume_pkl = resume_pkl
     

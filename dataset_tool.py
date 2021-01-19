@@ -948,8 +948,8 @@ def execute_cmdline(argv):
 
 if __name__ == "__main__":
     execute_cmdline(sys.argv)
-    # path = '/root/data/cartoon/cartoon/'
-    # patho = '/root/data/cartoon/cartoon1/'
+    # path = '/root/data/all_toons/'
+    # patho = '/root/data/all_toons1/'
     # from PIL import Image as PIM
     # for img_name in os.listdir(path):
     #     if img_name[0] == '.':
